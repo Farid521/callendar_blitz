@@ -1,7 +1,7 @@
 use std::env;
-use clap::builder::Str;
 use reqwest::blocking::{Client, get};
 use serde::Serialize;
+use webbrowser;
 
 fn get_env(key: &str) -> Result<String, String> {
     let val = env::var(key)
@@ -11,11 +11,17 @@ fn get_env(key: &str) -> Result<String, String> {
 #[derive(Serialize)]
 struct AuthQuery{
     client_id: String,
-    client_secret: String,
     redirect_uri: String,
     response_type: String,
     scope: String,
     access_type: String
+}
+
+pub fn open_in_browser(url: &str) -> bool {
+    if webbrowser::open(url).is_ok() {
+        return true;
+    }
+    return false;
 }
 
 pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,21 +29,19 @@ pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
     
     let auth_query = AuthQuery {
         client_id: get_env("CLIENT_ID")?,
-        client_secret: get_env("CLIENT_SECRET")?,
         redirect_uri: get_env("REDIRECT_URI")?,
         response_type: String::from("code"),
-        scope: get_env("SCOPE")?,
+        scope: get_env("SCOPES")?,
         access_type: String::from("offline")
     };
     
-    let resp = client.get("https://accounts.google.com/o/oauth2/v2/auth")
+    let req_url = client.get("https://accounts.google.com/o/oauth2/v2/auth")
         .query(&auth_query)
-        .send()?;
+        .build()?;
+    let oauth_google_url = req_url.url().as_str();
+
+    if !open_in_browser(oauth_google_url) {
+        return  Err("cannot launch a browser".into());
+    }
     Ok(())
 } 
-
-pub fn open_browser_auth() -> Result<(), Box<dyn std::error::Error>>{
-    
-    
-    Ok(())
-}

@@ -1,7 +1,8 @@
 use std::env;
-use reqwest::blocking::{Client, get};
+use reqwest::blocking::Client;
 use serde::Serialize;
 use webbrowser;
+use crate::auth::listener_server::wait_for_auth_code;
 
 fn get_env(key: &str) -> Result<String, String> {
     let val = env::var(key)
@@ -25,6 +26,9 @@ pub fn open_in_browser(url: &str) -> bool {
 }
 
 pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
+    let listener_host = get_env("LISTENER_SERVER_HOST")?;
+    let listener_port = get_env("LISTENER_SERVER_PORT")?;
+
     let client = Client::new();
     
     let auth_query = AuthQuery {
@@ -41,7 +45,11 @@ pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
     let oauth_google_url = req_url.url().as_str();
 
     if !open_in_browser(oauth_google_url) {
-        return  Err("cannot launch a browser".into());
+        return Err("cannot launch a browser".into());
     }
+
+    let auth_code = wait_for_auth_code(&listener_host, &listener_port)?;
+    println!("Auth code diterima: {}", auth_code);
+
     Ok(())
 } 

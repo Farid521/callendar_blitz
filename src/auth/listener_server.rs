@@ -20,8 +20,6 @@ fn handle_connection(mut stream: TcpStream) -> Result<String, Box<dyn std::error
         .next()
         .ok_or("Request kosong")??;
 
-    println!("Request masuk: {}", request_line);
-
     let response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n\
         <html><body><h2>Autentikasi berhasil! Silakan tutup tab ini.</h2></body></html>";
     stream.write_all(response.as_bytes())?;

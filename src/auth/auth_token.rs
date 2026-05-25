@@ -1,14 +1,13 @@
-use std::env;
+use clap::builder::Str;
 use reqwest::blocking::Client;
 use serde::Serialize;
 use webbrowser;
-use crate::auth::listener_server::wait_for_auth_code;
+use crate::auth:: {
+    listener_server::wait_for_auth_code,
+    env::get_env,
+    refresh_token
+};
 
-fn get_env(key: &str) -> Result<String, String> {
-    let val = env::var(key)
-        .map_err(|_|format!("env with key: {:?} cannot be fetched", key))?;
-    Ok(val)
-}
 #[derive(Serialize)]
 struct AuthQuery{
     client_id: String,
@@ -25,7 +24,7 @@ pub fn open_in_browser(url: &str) -> bool {
     return false;
 }
 
-pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
+pub fn get_auth_token() -> Result<String, Box<dyn std::error::Error>> {
     let listener_host = get_env("LISTENER_SERVER_HOST")?;
     let listener_port = get_env("LISTENER_SERVER_PORT")?;
 
@@ -51,5 +50,5 @@ pub fn get_refresh_token() -> Result<(), Box<dyn std::error::Error>> {
     let auth_code = wait_for_auth_code(&listener_host, &listener_port)?;
     println!("Auth code diterima: {}", auth_code);
 
-    Ok(())
+    Ok(auth_code)
 } 

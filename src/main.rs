@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     match cli.command {
         Commands::Auth => {
-            auth::google_auth::get_refresh_token()?;
+            auth::auth_token::get_auth_token()?;
             println!("auth triggered");
         },
         Commands::Status {status_string} => {

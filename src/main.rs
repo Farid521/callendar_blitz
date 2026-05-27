@@ -3,6 +3,7 @@ use std::{self, error::Error, env};
 use dotenv::dotenv;
 
 mod auth;
+mod api;
 
 #[derive(Parser)]
 struct Cli {
@@ -31,7 +32,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     match cli.command {
         Commands::Auth => {
-            auth::auth_token::get_auth_token()?;
+            auth::service::authenticate()?;
             println!("auth triggered");
         },
         Commands::Status {status_string} => {
